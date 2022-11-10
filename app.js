@@ -22,7 +22,7 @@ app.use(session({
 
 // / landing page logo deskripsi ada loginnya ada register tombol
 
-app.get('/', (req, res) => {
+app.get('/', isLoggin, (req, res) => {
     res.render('landingPage')
 })
 
@@ -105,7 +105,16 @@ app.get('/logout', (req,res) => {
 })
 
 app.get('/products/:productId/delete', (req,res)=>{
-    
+    const ProductId = req.params.productId
+
+    Product.destroy({
+        where: {id: ProductId}
+    })
+    .then(() => {
+        res.redirect('/products')
+    }).catch((err) => {
+        res.send(err)
+    });
 })
 
 

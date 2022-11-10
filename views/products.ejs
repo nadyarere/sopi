@@ -21,15 +21,18 @@
             <p style="margin-top: 1rem; margin-right: 10px;">
                 <%= user.role==="Admin" ? "Admin" : "Customer" %> - <%= user.name %>
             </p>
+            <% if (user.role === "Admin") { %>
+                <a href="/products/add" style="margin-right: 10px;" class="btn btn-outline-success my-2 my-sm-0">Add Product</a>
+                <a href="/orders" style="margin-right: 10px;" class="btn btn-outline-success my-2 my-sm-0">Check Orders</a>
+            <% } %>
             <a href="/logout" class="btn btn-outline-success my-2 my-sm-0">Log Out</a>
         </div>
       </nav>
-    <h1 class=""></h1>
     
     <div class="container" style="margin-top: 2rem;">
         <div class="row d-flex">
             <% products.forEach(el=> { %>
-                <div class="col-sm">
+                <div class="col">
                     <div class="card" style="width: 18rem; height: 18rem;">
                         <div class="container" style="background-color:#dddddd; height: 12rem;">
                             <img class="card-img-top" src="..." alt="Card image cap">
