@@ -86,10 +86,13 @@
 <body>
     <form action="/login" method="post">
         <div class="imgcontainer">
-            <img src="https://uploads.turbologo.com/uploads/design/hq_preview_image/881852/draw_svg20210625-19886-u8ghol.svg.png" alt="Avatar" class="avatar">
+            <a href="/"><img src="https://uploads.turbologo.com/uploads/design/hq_preview_image/881852/draw_svg20210625-19886-u8ghol.svg.png" alt="Avatar" class="avatar"></a>
         </div>
-
+        
         <div class="container">
+            <% if (error) { %>
+                <h3 style="color: red;"><%= error %></h3>
+            <% } %>
             <label for="email"><b>Email</b></label>
             <input type="text" placeholder="Enter Email" name="email" required>
 

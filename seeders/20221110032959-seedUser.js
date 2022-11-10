@@ -16,7 +16,6 @@ module.exports = {
 
     const users = JSON.parse(fs.readFileSync('./datas/users.json', 'utf-8')).map(el => {
       delete el.id
-
       el.createdAt = new Date()
       el.updatedAt = new Date()
 
