@@ -4,19 +4,19 @@ const session = require('express-session')
 const bcrypt = require('bcryptjs');
 const port = 3000
 
-const {User} = require('./models/index')
+const { User } = require('./models/index')
 
 app.set('view engine', 'ejs')
-app.use(express.urlencoded({extended:true}))
+app.use(express.urlencoded({ extended: true }))
 app.use(session({
     secret: 'keyboard cat',
     resave: false,
     saveUninitialized: false,
-    cookie: { 
+    cookie: {
         secure: false,
         sameSite: true
     }
-  }))
+}))
 
 // / landing page logo deskripsi ada loginnya ada register tombol
 
@@ -26,28 +26,32 @@ app.get('/', (req, res) => {
 
 app.get('/login', (req, res) => {
     const error = req.query.error
-
-    res.render('loginPage', {error})
+    res.render('loginPage', { error })
 })
 
 app.post('/login', (req, res) => {
-    const {email, password} = req.body
+    const { email, password } = req.body
 
     User.findOne({
-        where: {email}
+        where: { email }
     })
-    .then((user) => {
-        const isValidPassword = bcrypt.compareSync(password, user.password)
-        
-        if(isValidPassword){
-            res.redirect('/products')
-        } else {
-            const error = 'Invalid Email and Password'
-            res.redirect(`/login?error=${error}`)
-        }
-    }).catch((err) => {
-        res.send(err)
-    });
+        .then((user) => {
+            if(!user){
+                res.redirect('/products')
+            } else {
+                const isValidPassword = bcrypt.compareSync(password, user.password)
+    
+                if (isValidPassword) {
+                    req.session.user = user
+                    res.redirect('/products')
+                } else {
+                    const error = 'Invalid Email and Password'
+                    res.redirect(`/login?error=${error}`)
+                }
+            }
+        }).catch((err) => {
+            res.send(err)
+        });
 })
 
 app.get('/register', (req, res) => {
@@ -55,7 +59,7 @@ app.get('/register', (req, res) => {
 })
 
 app.post('/register', (req, res) => {
-    const {email, password, role, name} = req.body
+    const { email, password, role, name } = req.body
 
     User.create({
         email,
@@ -63,19 +67,25 @@ app.post('/register', (req, res) => {
         role,
         name
     })
-    .then((result) => {
-        res.send(result)
-    }).catch((err) => {
-        res.send(err)
-    });
-    
+        .then((result) => {
+            res.redirect('/login')
+        }).catch((err) => {
+            res.send(err)
+        });
+
 })
 
-// const isCustomer = (req, res, next) => {
-//    if(!req.session) 
-// }
+//--------------------------
+const isUser = (req, res, next) => {
+    if (!req.session.user) {
+        const error = 'You need to register first'
+        res.redirect(`/login?error=${error}`)
+    } else {
+        next()
+    }
+}
 
-app.get('/products', (req, res) => {
+app.get('/products', isUser, (req, res) => {
     res.render('products')
 })
 
