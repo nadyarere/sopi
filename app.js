@@ -4,8 +4,8 @@ const session = require('express-session')
 const bcrypt = require('bcryptjs');
 const port = 3000
 
-const { User, Product } = require('./models/index');
-const { isUser } = require('./middlewares/auth');
+const { User, Product, Category } = require('./models/index');
+const { isUser, isAdmin } = require('./middlewares/auth');
 
 app.set('view engine', 'ejs')
 app.use(express.urlencoded({ extended: true }))
@@ -26,8 +26,9 @@ app.get('/', (req, res) => {
 })
 
 app.get('/login', (req, res) => {
-    const error = req.query.error
+    const error = req.query.errors
     res.render('loginPage', { error })
+    // res.send(error)
 })
 
 app.post('/login', (req, res) => {
@@ -37,27 +38,28 @@ app.post('/login', (req, res) => {
         where: { email }
     })
         .then((user) => {
-            if(!user){
+            if (!user) {
                 res.redirect('/products')
             } else {
                 const isValidPassword = bcrypt.compareSync(password, user.password)
-    
-                if (isValidPassword) {
-                    const {id, role} = user
 
-                    req.session.user = {id, role}
+                if (isValidPassword) {
+                    const { id, role } = user
+
+                    req.session.user = { id, role }
                     res.redirect('/products')
                 } else {
                     res.redirect(`/login?error=${'Invalid Email or Password'}`)
                 }
             }
         }).catch((err) => {
-            res.send(err)
+            console.log(err);
         });
 })
 
 app.get('/register', (req, res) => {
-    res.render('registerPage')
+    const errors = req.query.errors
+    res.render('registerPage', { errors })
 })
 
 app.post('/register', (req, res) => {
@@ -72,7 +74,13 @@ app.post('/register', (req, res) => {
         .then((result) => {
             res.redirect('/login')
         }).catch((err) => {
-            res.send(err)
+            if (err.name === "SequelizeValidationError") {
+                let listOfErrors = err.errors.map(el => {
+                    return el.message
+                })
+
+                res.redirect(`/login?errors=${listOfErrors}`)
+            }
         });
 
 })
@@ -82,14 +90,44 @@ app.get('/products', isUser, (req, res) => {
     const id = req.session.user.id
     let user = {}
 
-    User.findByPk(id)
-    .then((result) => {
-        user = result
 
-        // res.render('products', {user:result})
-    }).catch((err) => {
-        
-    });
+    User.findByPk(id)
+        .then((result) => {
+            res.render('products', { user: result })
+        }).catch((err) => {
+
+        });
+})
+
+app.get('/products/add', isUser, isAdmin, (req, res) => {
+
+    Category.findAll({
+        attributes: ['id', 'name']
+    })
+        .then((result => {
+            res.render('addProduct', { result })
+        }))
+        .catch(err => {
+            res.send(err)
+        })
+
+})
+
+app.post('/products/add', isUser, isAdmin, (req, res) => {
+    const { name, description, price, CategoryId } = req.body
+
+    Product.create({
+        name,
+        description,
+        price,
+        CategoryId
+    })
+        .then((_) => {
+            res.redirect('/products')
+        })
+        .catch(err => {
+            res.send(err)
+        })
 })
 
 

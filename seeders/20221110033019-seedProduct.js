@@ -14,6 +14,8 @@ module.exports = {
      * }], {});
     */
     const products = JSON.parse(fs.readFileSync('./datas/products.json', 'utf-8')).map(el => {
+      delete el.id
+
       el.createdAt = new Date()
       el.updatedAt = new Date()
 
