@@ -9,8 +9,11 @@ app.use(express.urlencoded({extended:true}))
 app.use(session({
     secret: 'keyboard cat',
     resave: false,
-    saveUninitialized: true,
-    cookie: { secure: true }
+    saveUninitialized: false,
+    cookie: { 
+        secure: false,
+        sameSite: true
+    }
   }))
 
 // / landing page logo deskripsi ada loginnya ada register tombol
