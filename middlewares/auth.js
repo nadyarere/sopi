@@ -10,6 +10,16 @@ const isUser = (req, res, next) => {
     }
 }
 
+const isLoggin = (req, res, next) => {
+    if (req.session.user) {
+        res.redirect(`/products`)
+    } else {
+        next()
+    }
+}
+
+
 module.exports = {
-    isUser
+    isUser,
+    isLoggin
 }

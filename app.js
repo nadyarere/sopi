@@ -5,10 +5,11 @@ const bcrypt = require('bcryptjs');
 const port = 3000
 
 const { User, Product } = require('./models/index');
-const { isUser } = require('./middlewares/auth');
+const { isUser, isLoggin} = require('./middlewares/auth');
 
 app.set('view engine', 'ejs')
 app.use(express.urlencoded({ extended: true }))
+
 app.use(session({
     secret: 'keyboard cat',
     resave: false,
@@ -25,10 +26,11 @@ app.get('/', (req, res) => {
     res.render('landingPage')
 })
 
-app.get('/login', (req, res) => {
+app.get('/login', isLoggin, (req, res) => {
     const error = req.query.error
     res.render('loginPage', { error })
 })
+
 
 app.post('/login', (req, res) => {
     const { email, password } = req.body
@@ -56,7 +58,7 @@ app.post('/login', (req, res) => {
         });
 })
 
-app.get('/register', (req, res) => {
+app.get('/register', isLoggin, (req, res) => {
     res.render('registerPage')
 })
 
@@ -69,7 +71,7 @@ app.post('/register', (req, res) => {
         role,
         name
     })
-        .then((result) => {
+        .then(() => {
             res.redirect('/login')
         }).catch((err) => {
             res.send(err)
@@ -78,19 +80,35 @@ app.post('/register', (req, res) => {
 })
 
 
-app.get('/products', isUser, (req, res) => {
+app.get('/products', isUser,  (req, res) => {
     const id = req.session.user.id
     let user = {}
 
     User.findByPk(id)
     .then((result) => {
         user = result
-
-        // res.render('products', {user:result})
-    }).catch((err) => {
-        
+        return Product.findAll()
+    })
+    .then((result) => {
+        res.render('products', { user, products: result})
+    })
+    .catch((err) => {
+        res.send(err)
     });
 })
+
+app.get('/logout', (req,res) => {
+    if(req.session){
+        req.session.destroy()
+        res.redirect('/')
+    }
+})
+
+app.get('/products/:productId/delete', (req,res)=>{
+    
+})
+
+
 
 
 

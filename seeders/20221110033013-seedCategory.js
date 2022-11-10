@@ -14,6 +14,7 @@ module.exports = {
      * }], {});
     */
     const categories = JSON.parse(fs.readFileSync('./datas/categories.json', 'utf-8')).map(el => {
+      delete el.id
       el.createdAt = new Date()
       el.updatedAt = new Date()
 
