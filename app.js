@@ -126,7 +126,13 @@ app.post('/products/add', isUser, isAdmin, (req, res) => {
             res.redirect('/products')
         })
         .catch(err => {
-            res.send(err)
+            if (err.name === "SequelizeValidationError") {
+                let listOfErrors = err.errors.map(el => {
+                    return el.message
+                })
+
+                res.redirect(`/products?errors=${listOfErrors}`)
+            }
         })
 })
 

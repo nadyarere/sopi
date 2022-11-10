@@ -19,7 +19,10 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false,
       validate: {
-        notEmpty: true,
+        notEmpty: {
+          args: true,
+          msg: 'Name cannot be empty'
+        },
         notNull: true
       }
     },
@@ -27,7 +30,10 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false,
       validate: {
-        notEmpty: true,
+        notEmpty: {
+          args: true,
+          msg: 'Description cannot be empty'
+        },
         notNull: true
       }
     },
@@ -35,12 +41,29 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       allowNull: false,
       validate: {
-        notEmpty: true,
+        notEmpty: {
+          args: true,
+          msg: 'Description cannot be empty'
+        },
         notNull: true,
-        min:0
+        min: {
+          args: 0,
+          msg: 'Price cannot be less than 1'
+        }
       }
     },
-    CategoryId: DataTypes.INTEGER,
+    CategoryId: {
+      type : DataTypes.INTEGER,
+      allowNull: false,
+      validate: {
+        notEmpty: {
+          args: true,
+          msg: 'Category cannot be empty'
+        },
+        notNull: true,
+
+      }
+    },
   }, {
     sequelize,
     modelName: 'Product',
