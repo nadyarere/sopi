@@ -4,7 +4,8 @@ const session = require('express-session')
 const bcrypt = require('bcryptjs');
 const port = 3000
 
-const { User } = require('./models/index')
+const { User, Product } = require('./models/index');
+const { isUser } = require('./middlewares/auth');
 
 app.set('view engine', 'ejs')
 app.use(express.urlencoded({ extended: true }))
@@ -42,11 +43,12 @@ app.post('/login', (req, res) => {
                 const isValidPassword = bcrypt.compareSync(password, user.password)
     
                 if (isValidPassword) {
-                    req.session.user = user
+                    const {id, role} = user
+
+                    req.session.user = {id, role}
                     res.redirect('/products')
                 } else {
-                    const error = 'Invalid Email and Password'
-                    res.redirect(`/login?error=${error}`)
+                    res.redirect(`/login?error=${'Invalid Email or Password'}`)
                 }
             }
         }).catch((err) => {
@@ -75,27 +77,29 @@ app.post('/register', (req, res) => {
 
 })
 
-//--------------------------
-const isUser = (req, res, next) => {
-    if (!req.session.user) {
-        const error = 'You need to register first'
-        res.redirect(`/login?error=${error}`)
-    } else {
-        next()
-    }
-}
 
 app.get('/products', isUser, (req, res) => {
-    res.render('products')
+    const id = req.session.user.id
+    let user = {}
+
+    User.findByPk(id)
+    .then((result) => {
+        user = result
+
+        // res.render('products', {user:result})
+    }).catch((err) => {
+        
+    });
 })
+
 
 
 //userid pake session
 /**
  * /products list kategory dan products yang diliat sama customer klo admin 
  * /products/:productId (detail product)
- * /checkout (dilihat sama customer) //create order
- * /orders (diliat admin) //findall order
+ * /checkout (dilihat sama customer) //create order middle cutomer
+ * /orders (diliat admin) //findall order 
  * /products/add (diliat admin)
  * /products/:productId/delete (diliat admin)
  * /products/:productId/edit (admin)
