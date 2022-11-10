@@ -4,6 +4,8 @@ const session = require('express-session')
 const bcrypt = require('bcryptjs');
 const port = 3000
 
+const {User} = require('./models/index')
+
 app.set('view engine', 'ejs')
 app.use(express.urlencoded({extended:true}))
 app.use(session({
@@ -18,13 +20,34 @@ app.use(session({
 
 // / landing page logo deskripsi ada loginnya ada register tombol
 
+app.get('/', (req, res) => {
+    res.render('landingPage')
+})
 
 app.get('/login', (req, res) => {
-    res.render('loginPage')
+    const error = req.query.error
+
+    res.render('loginPage', {error})
 })
 
 app.post('/login', (req, res) => {
-    res.send(req.body)
+    const {email, password} = req.body
+
+    User.findOne({
+        where: {email}
+    })
+    .then((user) => {
+        const isValidPassword = bcrypt.compareSync(password, user.password)
+        
+        if(isValidPassword){
+            res.redirect('/products')
+        } else {
+            const error = 'Invalid Email and Password'
+            res.redirect(`/login?error=${error}`)
+        }
+    }).catch((err) => {
+        res.send(err)
+    });
 })
 
 app.get('/register', (req, res) => {
@@ -32,7 +55,28 @@ app.get('/register', (req, res) => {
 })
 
 app.post('/register', (req, res) => {
-    res.send(req.body)
+    const {email, password, role, name} = req.body
+
+    User.create({
+        email,
+        password,
+        role,
+        name
+    })
+    .then((result) => {
+        res.send(result)
+    }).catch((err) => {
+        res.send(err)
+    });
+    
+})
+
+// const isCustomer = (req, res, next) => {
+//    if(!req.session) 
+// }
+
+app.get('/products', (req, res) => {
+    res.render('products')
 })
 
 
