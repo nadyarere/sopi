@@ -82,6 +82,13 @@
             <h1>Register</h1>
             <p>Please fill in this form to create an account.</p>
             <hr>
+            <% if (errors) { %>
+             <% errors.split(',').forEach(el => { %>
+                <p style="color: red;"><%= el %></p>
+             <% }) %>
+            <% } %>
+            <br>
+
             <label for="name"><b>Name</b></label>
             <input type="text" placeholder="Enter Name" name="name" id="name" required>
 
@@ -89,7 +96,7 @@
             <input type="email" placeholder="Enter Email (example@mail.com)" name="email" id="email" required>
 
             <label for="password"><b>Password</b></label>
-            <input type="password" minlength="8" placeholder="Enter Password" name="password" id="password" required>
+            <input type="password" placeholder="Enter Password" name="password" id="password" required>
             
             <label for="role">Register Sebagai: </label>
             <select style="width: 100px;" name="role" id="role" required>
